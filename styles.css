@@ -198,3 +198,19 @@ input, select, textarea, .editable {
 }
 .spell-level { font-size: 0.7rem; color: #aaa; text-transform: uppercase; }
 .spell-meta { font-size: 0.8rem; color: var(--accent); margin-bottom: 5px; }
+/* --- ITEM CARDS --- */
+.item-card {
+    background: rgba(255, 255, 255, 0.05);
+    border-left: 3px solid #ff9800; /* Orange for items */
+    padding: 10px; margin-bottom: 10px; border-radius: 4px;
+}
+.item-meta { font-size: 0.75rem; color: #ffb74d; text-transform: uppercase; letter-spacing: 1px; }
+.item-stats { 
+    display: flex; gap: 15px; margin-top: 5px; font-size: 0.9rem; font-weight: bold; color: #eee;
+}
+
+/* --- SETTINGS / EXPORT --- */
+.settings-bar {
+    display: flex; justify-content: flex-end; gap: 10px; 
+    margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #333;
+}

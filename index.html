@@ -160,17 +160,52 @@
             </div>
         </div>
 
+        <div class="container">
+        <div class="settings-bar">
+            <button class="btn btn-outline" onclick="exportData()" style="font-size:0.7rem;">💾 Save to File</button>
+            <button class="btn btn-outline" onclick="document.getElementById('import-file').click()" style="font-size:0.7rem;">📂 Load File</button>
+            <input type="file" id="import-file" style="display:none" onchange="importData(this)">
+        </div>
+
         <div id="tab-inventory" class="tab-content" style="grid-column: span 2;">
             <div class="panel">
-                <h2>Inventory & Equipment</h2>
-                <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-                    <input type="number" id="gold-val" placeholder="GP" oninput="saveGlobal()" style="width: 80px;">
-                    <div style="color: gold; align-self: center; font-weight: bold;">GP</div>
+                <h2>The Armory</h2>
+                
+                <div class="search-container">
+                    <div style="display: flex; gap: 5px; margin-bottom: 5px;">
+                        <select id="inv-search-type" style="width: 120px;">
+                            <option value="magicitems">Magic Item</option>
+                            <option value="weapons">Weapon</option>
+                            <option value="armor">Armor</option>
+                        </select>
+                        <input type="text" id="inv-search" placeholder="Search the archives..." onkeyup="searchInventory(this.value)">
+                    </div>
+                    <div id="inv-results" class="search-results"></div>
+                </div>
+
+                <div style="display: flex; gap: 15px; margin-bottom: 15px; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px;">
+                    <div style="display:flex; flex-direction:column; align-items:center;">
+                        <label style="font-size:0.7rem; color:gold;">GP</label>
+                        <input type="number" id="currency-gp" oninput="saveGlobal()" style="width:60px; text-align:center; color:gold; border-color:gold;">
+                    </div>
+                    <div style="display:flex; flex-direction:column; align-items:center;">
+                        <label style="font-size:0.7rem; color:silver;">SP</label>
+                        <input type="number" id="currency-sp" oninput="saveGlobal()" style="width:60px; text-align:center; color:silver; border-color:silver;">
+                    </div>
+                    <div style="display:flex; flex-direction:column; align-items:center;">
+                        <label style="font-size:0.7rem; color:#cd7f32;">CP</label>
+                        <input type="number" id="currency-cp" oninput="saveGlobal()" style="width:60px; text-align:center; color:#cd7f32; border-color:#cd7f32;">
+                    </div>
                 </div>
                 
-                <div id="global-inventory" class="editable" contenteditable="true" oninput="saveGlobal()" style="min-height: 300px;"></div>
+                <div id="inventory-list">
+                    </div>
+
+                <h3 style="margin-top: 20px; border-top: 1px solid #444; padding-top: 10px;">Misc. Gear</h3>
+                <div id="global-inventory" class="editable" contenteditable="true" oninput="saveGlobal()" style="min-height: 100px;"></div>
             </div>
         </div>
+    </div>
 
     </div>
 

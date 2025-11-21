@@ -145,7 +145,13 @@ function updateUI() {
         }
     });
     renderSpells();
+    renderInventory();
+
+    document.getElementById('currency-gp').value = globalData.gp || 0;
+    document.getElementById('currency-sp').value = globalData.sp || 0;
+    document.getElementById('currency-cp').value = globalData.cp || 0;
 }
+
 
 // --- RESOURCE LOGIC ---
 function toggleRes(resIdx, bubbleIdx) {
@@ -279,6 +285,9 @@ function applyCharactermancer() {
 function saveGlobal() {
     globalData.name = document.getElementById('global-name').value;
     globalData.inventory = document.getElementById('global-inventory').innerHTML;
+    globalData.gp = document.getElementById('currency-gp').value;
+    globalData.sp = document.getElementById('currency-sp').value;
+    globalData.cp = document.getElementById('currency-cp').value;
     saveAll();
 }
 
@@ -502,4 +511,149 @@ function removeSpell(index) {
     formsData[currentFormId].spells.splice(index, 1);
     renderSpells();
     saveAll();
+}
+
+// --- INVENTORY API LOGIC ---
+let invSearchTimeout;
+
+function searchInventory(query) {
+    const type = document.getElementById('inv-search-type').value;
+    const resultsBox = document.getElementById('inv-results');
+    
+    if(query.length < 3) {
+        resultsBox.style.display = 'none';
+        return;
+    }
+
+    clearTimeout(invSearchTimeout);
+    invSearchTimeout = setTimeout(async () => {
+        resultsBox.innerHTML = '<div style="padding:10px;">Forging request...</div>';
+        resultsBox.style.display = 'block';
+
+        try {
+            // Open5e has different endpoints: /magicitems/, /weapons/, /armor/
+            const response = await fetch(`https://api.open5e.com/${type}/?search=${query}&limit=5`);
+            const data = await response.json();
+            
+            resultsBox.innerHTML = '';
+            if(data.results.length === 0) {
+                resultsBox.innerHTML = '<div style="padding:10px;">No items found.</div>';
+            }
+
+            data.results.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'result-item';
+                // Display formatting based on type
+                let subtitle = item.type || item.category || "Item";
+                div.innerHTML = `<span>${item.name}</span> <span style="font-size:0.8rem; color:#aaa;">${subtitle}</span>`;
+                div.onclick = () => addItemToInventory(item, type);
+                resultsBox.appendChild(div);
+            });
+
+        } catch (e) {
+            console.error(e);
+            resultsBox.innerHTML = '<div style="padding:10px; color:red;">API Error.</div>';
+        }
+    }, 500);
+}
+
+function addItemToInventory(itemData, type) {
+    const form = formsData[currentFormId];
+    if(!form.inventory) form.inventory = [];
+
+    // Normalize Data (APIs have different field names)
+    const cleanItem = {
+        name: itemData.name,
+        type: type,
+        desc: itemData.desc || itemData.description || "No description.",
+        // Weapons have damage, Armor has ac_string, Magic Items have rarity
+        damage: itemData.damage_dice ? `${itemData.damage_dice} ${itemData.damage_type}` : null,
+        ac: itemData.ac_string || null,
+        rarity: itemData.rarity || null,
+        properties: itemData.properties ? itemData.properties.join(', ') : null
+    };
+
+    form.inventory.push(cleanItem);
+
+    document.getElementById('inv-results').style.display = 'none';
+    document.getElementById('inv-search').value = '';
+    renderInventory();
+    saveAll();
+}
+
+function renderInventory() {
+    const container = document.getElementById('inventory-list');
+    const form = formsData[currentFormId];
+    container.innerHTML = '';
+
+    if(!form.inventory || form.inventory.length === 0) {
+        return; 
+    }
+
+    form.inventory.forEach((item, index) => {
+        const div = document.createElement('div');
+        div.className = 'item-card';
+        
+        // Build the stats line dynamically
+        let statsHTML = '';
+        if(item.damage) statsHTML += `<span style="color:#ff5252">⚔ ${item.damage}</span>`;
+        if(item.ac) statsHTML += `<span style="color:#448aff">🛡 ${item.ac}</span>`;
+        if(item.rarity) statsHTML += `<span style="color:#e040fb">✨ ${item.rarity}</span>`;
+
+        div.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick="this.nextElementSibling.open = !this.nextElementSibling.open">
+                <strong>${item.name}</strong>
+                <button class="btn btn-danger" style="padding:2px 6px; font-size:0.6rem;" onclick="event.stopPropagation(); removeItem(${index})">X</button>
+            </div>
+            <details>
+                <summary class="item-meta">${item.type}</summary>
+                <div class="item-stats">${statsHTML}</div>
+                <p style="font-size:0.9rem; white-space:pre-wrap; margin-top:5px; color:#ccc;">${item.desc}</p>
+            </details>
+        `;
+        container.appendChild(div);
+    });
+}
+
+function removeItem(index) {
+    if(!confirm("Discard this item?")) return;
+    formsData[currentFormId].inventory.splice(index, 1);
+    renderInventory();
+    saveAll();
+}
+
+// --- DATA EXPORT / IMPORT (SOUL LINK) ---
+function exportData() {
+    const dataStr = localStorage.getItem('dnd_meta_v5');
+    if(!dataStr) { alert("No data to save!"); return; }
+    
+    const blob = new Blob([dataStr], {type: "application/json"});
+    const url = URL.createObjectURL(blob);
+    
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `character_${globalData.name || 'unnamed'}_${Date.now()}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+}
+
+function importData(input) {
+    const file = input.files[0];
+    if(!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const json = JSON.parse(e.target.result);
+            // Basic validation
+            if(!json.forms || !json.global) throw new Error("Invalid Character File");
+            
+            localStorage.setItem('dnd_meta_v5', JSON.stringify(json));
+            location.reload(); // Reload to apply changes
+        } catch(err) {
+            alert("Error loading file: " + err.message);
+        }
+    };
+    reader.readAsText(file);
 }
