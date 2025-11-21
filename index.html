@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Metamorphosis Engine</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <div class="container">
+        <div class="top-bar">
+            <div>
+                <input type="text" id="global-name" oninput="saveGlobal()" placeholder="Character Name" style="font-size: 1.5rem; font-weight: bold; background: transparent; border: none; width: 100%;">
+            </div>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <select id="form-selector" onchange="switchForm(this.value)" style="width: auto; min-width: 120px;"></select>
+                <button class="btn" onclick="createNewForm()">+ New Form</button>
+                <button class="btn btn-outline" onclick="openCharactermancer()">✨ Level Up</button>
+            </div>
+        </div>
+
+        <div class="panel">
+            <h2 style="color: var(--accent);">Attributes</h2>
+            <div id="stats-container"></div> 
+            
+            <h2 style="color: var(--accent);">Saving Throws</h2>
+            <div id="saves" class="editable" contenteditable="true" oninput="saveCurrentForm()"></div>
+        </div>
+
+        <div class="panel">
+            <div style="display:flex; justify-content:space-between;">
+                <h2 style="color: var(--accent);">Class Features</h2>
+                <span id="class-badge" style="background:var(--secondary); padding:2px 8px; border-radius:4px; font-size:0.8rem; height: fit-content;">Form</span>
+            </div>
+            <div id="features" class="editable" contenteditable="true" oninput="saveCurrentForm()" style="flex-grow: 1;"></div>
+            
+            <h2 style="color: var(--accent);">Inventory (Global)</h2>
+            <div id="global-inventory" class="editable" contenteditable="true" oninput="saveGlobal()" style="height: 100px;"></div>
+        </div>
+
+        <div class="panel">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h2 style="color: var(--accent);">Combat</h2>
+                <button class="btn btn-outline" style="font-size: 0.7rem; padding: 2px 8px;" onclick="takeLongRest()">💤 Rest</button>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+                <div style="text-align: center;">
+                    <label style="font-size: 0.7rem; color: #aaa;">AC</label>
+                    <input type="number" id="ac" oninput="saveCurrentForm()" style="text-align: center; font-size: 1.2rem;">
+                </div>
+                <div style="text-align: center;">
+                    <label style="font-size: 0.7rem; color: #aaa;">INIT</label>
+                    <input type="number" id="init" oninput="saveCurrentForm()" style="text-align: center; font-size: 1.2rem;">
+                </div>
+                <div style="text-align: center;">
+                    <label style="font-size: 0.7rem; color: #aaa;">SPD</label>
+                    <input type="text" id="spd" oninput="saveCurrentForm()" style="text-align: center; font-size: 1.2rem;">
+                </div>
+            </div>
+
+            <div style="margin-top: 15px;">
+                <div class="hp-container">
+                    <div id="hp-bar" class="hp-fill"></div>
+                    <div class="hp-overlay-text">
+                        <span id="hp-display-curr">10</span> / <span id="hp-display-max">10</span>
+                    </div>
+                </div>
+                <div style="display: flex; justify-content: space-between; gap: 5px;">
+                    <button class="btn btn-danger" style="width: 30px;" onclick="modHP(-1)">-</button>
+                    <input type="number" id="hp-curr" oninput="updateHPUI(); saveCurrentForm()" style="text-align: center; width: 60px;">
+                    <span style="align-self: center;">/</span>
+                    <input type="number" id="hp-max" oninput="updateHPUI(); saveCurrentForm()" style="text-align: center; width: 60px;">
+                    <button class="btn" style="width: 30px; background: #43a047;" onclick="modHP(1)">+</button>
+                </div>
+            </div>
+
+            <div style="margin-top: 10px; background: rgba(0,0,0,0.2); padding: 5px; border-radius: 6px;">
+                <div class="death-save-row">
+                    <span style="font-size: 0.7rem; color: #aaa; width: 40px;">SUCC</span>
+                    <div class="ds-circle" id="ds-s1" onclick="toggleDS('s', 1)"></div>
+                    <div class="ds-circle" id="ds-s2" onclick="toggleDS('s', 2)"></div>
+                    <div class="ds-circle" id="ds-s3" onclick="toggleDS('s', 3)"></div>
+                </div>
+                <div class="death-save-row">
+                    <span style="font-size: 0.7rem; color: #aaa; width: 40px;">FAIL</span>
+                    <div class="ds-circle" id="ds-f1" onclick="toggleDS('f', 1)"></div>
+                    <div class="ds-circle" id="ds-f2" onclick="toggleDS('f', 2)"></div>
+                    <div class="ds-circle" id="ds-f3" onclick="toggleDS('f', 3)"></div>
+                </div>
+            </div>
+
+            <h2 style="color: var(--accent); margin-top: 20px;">Resources</h2>
+            <div id="resources-container"></div>
+            <button class="btn" onclick="addResource()" style="width: 100%; background: #333; margin-top: 10px; font-size: 0.8rem;">+ Custom Tracker</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="tab-bar">
+            <button class="tab-btn active" onclick="openTab('main')">Main Sheet</button>
+            <button class="tab-btn" onclick="openTab('spells')">Grimoire</button>
+            <button class="tab-btn" onclick="openTab('inventory')">Inventory</button>
+        </div>
+
+        <div class="panel">
+            <h2 style="color: var(--accent);">Attributes</h2>
+            <div id="stats-container"></div>
+            <h2 style="color: var(--accent);">Saves</h2>
+            <div id="saves" class="editable" contenteditable="true" oninput="saveCurrentForm()"></div>
+        </div>
+
+        <div id="tab-main" class="tab-content active" style="grid-column: span 2; display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            
+            <div class="panel">
+                <div style="display:flex; justify-content:space-between;">
+                    <h2 style="color: var(--accent);">Features</h2>
+                    <span id="class-badge" style="background:var(--secondary); padding:2px 8px; border-radius:4px; font-size:0.8rem;">Form</span>
+                </div>
+                <div id="features" class="editable" contenteditable="true" oninput="saveCurrentForm()" style="flex-grow: 1;"></div>
+            </div>
+
+            <div class="panel">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h2 style="color: var(--accent);">Combat</h2>
+                    <button class="btn btn-outline" style="font-size:0.7rem;" onclick="takeLongRest()">💤 Rest</button>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                    <input type="number" id="ac" oninput="saveCurrentForm()" placeholder="AC" style="text-align:center">
+                    <input type="number" id="init" oninput="saveCurrentForm()" placeholder="Init" style="text-align:center">
+                    <input type="text" id="spd" oninput="saveCurrentForm()" placeholder="Spd" style="text-align:center">
+                </div>
+
+                <div class="hp-container"><div id="hp-bar" class="hp-fill"></div><div class="hp-overlay-text"><span id="hp-display-curr"></span>/<span id="hp-display-max"></span></div></div>
+                <div style="display:flex; gap:5px; justify-content:center;">
+                    <button class="btn btn-danger" onclick="modHP(-1)">-</button>
+                    <input type="number" id="hp-curr" oninput="updateHPUI(); saveCurrentForm()" style="width:50px; text-align:center">
+                    <input type="number" id="hp-max" oninput="updateHPUI(); saveCurrentForm()" style="width:50px; text-align:center">
+                    <button class="btn" style="background:#43a047" onclick="modHP(1)">+</button>
+                </div>
+
+                <h2 style="color: var(--accent); margin-top: 15px;">Resources</h2>
+                <div id="resources-container"></div>
+                <button class="btn" onclick="addResource()" style="width: 100%; background: #333; margin-top: 10px; font-size: 0.8rem;">+ Custom Tracker</button>
+            </div>
+        </div>
+
+        <div id="tab-spells" class="tab-content" style="grid-column: span 2;">
+            <div class="panel">
+                <h2>Spellcasting</h2>
+                <div class="search-container">
+                    <input type="text" id="spell-search" placeholder="🔍 Search API for Spells (e.g. Fireball)..." onkeyup="searchAPI(this.value, 'spells')">
+                    <div id="spell-results" class="search-results"></div>
+                </div>
+                
+                <div id="spellbook-container">
+                    </div>
+            </div>
+        </div>
+
+        <div id="tab-inventory" class="tab-content" style="grid-column: span 2;">
+            <div class="panel">
+                <h2>Inventory & Equipment</h2>
+                <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                    <input type="number" id="gold-val" placeholder="GP" oninput="saveGlobal()" style="width: 80px;">
+                    <div style="color: gold; align-self: center; font-weight: bold;">GP</div>
+                </div>
+                
+                <div id="global-inventory" class="editable" contenteditable="true" oninput="saveGlobal()" style="min-height: 300px;"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="data.js"></script>
+    <script src="main.js"></script>
+</body>
+</html>

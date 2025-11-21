@@ -1,0 +1,200 @@
+/* styles.css */
+:root {
+    --bg-image: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+    --glass-bg: rgba(30, 30, 30, 0.75);
+    --glass-border: 1px solid rgba(255, 255, 255, 0.1);
+    --text-main: #e0e0e0;
+    --accent: #00d2ff;
+    --secondary: #9d50bb;
+}
+
+body {
+    font-family: 'Segoe UI', sans-serif;
+    background: var(--bg-image);
+    color: var(--text-main);
+    margin: 0;
+    padding: 20px;
+    min-height: 100vh;
+}
+
+/* Utility */
+.container {
+    display: grid;
+    grid-template-columns: 280px 1fr 320px;
+    gap: 20px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.panel {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    border: var(--glass-border);
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+}
+
+input, select, textarea, .editable {
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid #444;
+    color: white;
+    padding: 8px;
+    border-radius: 6px;
+    font-family: inherit;
+    width: 100%;
+    box-sizing: border-box;
+}
+.editable { min-height: 100px; white-space: pre-wrap; }
+
+/* Top Bar */
+.top-bar {
+    grid-column: 1 / -1;
+    display: flex; justify-content: space-between; align-items: center;
+    background: var(--glass-bg); border: var(--glass-border);
+    padding: 15px 30px; border-radius: 15px; margin-bottom: 20px;
+}
+
+/* Modal (The Charactermancer) */
+.modal-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.8); z-index: 100;
+    display: none; justify-content: center; align-items: center;
+}
+.modal-content {
+    background: #1e1e1e; padding: 30px; border-radius: 15px;
+    width: 400px; border: 2px solid var(--accent);
+    box-shadow: 0 0 20px var(--accent);
+}
+
+/* Buttons */
+.btn {
+    background: linear-gradient(45deg, #2196F3, #21CBF3);
+    border: none; color: white; padding: 8px 15px; border-radius: 20px;
+    cursor: pointer; font-weight: bold; text-transform: uppercase;
+    transition: 0.2s;
+}
+.btn:hover { transform: scale(1.05); }
+.btn-outline { background: transparent; border: 1px solid var(--accent); color: var(--accent); }
+
+/* Add to styles.css */
+
+.feature-item {
+    margin-bottom: 5px;
+}
+.feature-item summary:hover {
+    color: white;
+}
+.feature-item[open] summary {
+    margin-bottom: 5px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+/* --- HEALTH BAR --- */
+.hp-container {
+    position: relative;
+    background: rgba(0,0,0,0.5);
+    height: 25px;
+    border-radius: 12px;
+    margin: 10px 0;
+    overflow: hidden;
+    border: 1px solid #444;
+}
+
+.hp-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #43a047, #66bb6a); /* Healthy Green */
+    width: 100%; /* JS will change this */
+    transition: width 0.4s ease, background 0.4s ease;
+}
+
+/* Dynamic Colors for Low HP */
+.hp-fill.warning { background: linear-gradient(90deg, #ff9800, #ffb74d); }
+.hp-fill.danger { background: linear-gradient(90deg, #d32f2f, #ef5350); }
+
+.hp-overlay-text {
+    position: absolute;
+    width: 100%;
+    text-align: center;
+    top: 2px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    color: white;
+    text-shadow: 0 1px 3px black;
+    pointer-events: none;
+}
+
+/* --- DEATH SAVES --- */
+.death-save-row {
+    display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 5px;
+}
+.ds-circle {
+    width: 12px; height: 12px; border-radius: 50%; border: 2px solid #555; cursor: pointer;
+}
+.ds-circle.success { background: #43a047; border-color: #43a047; box-shadow: 0 0 5px #43a047;}
+.ds-circle.fail { background: #d32f2f; border-color: #d32f2f; box-shadow: 0 0 5px #d32f2f;}
+/* --- TABS --- */
+.tab-bar {
+    grid-column: 1 / -1;
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #444;
+    padding-bottom: 10px;
+}
+
+.tab-btn {
+    background: transparent;
+    border: none;
+    color: #888;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 5px 15px;
+    text-transform: uppercase;
+    transition: 0.2s;
+}
+
+.tab-btn:hover { color: var(--accent); }
+.tab-btn.active { 
+    color: var(--accent); 
+    border-bottom: 2px solid var(--accent); 
+}
+
+.tab-content { display: none; animation: fadeIn 0.3s ease; }
+.tab-content.active { display: block; }
+
+/* --- SEARCH RESULTS (API) --- */
+.search-container { position: relative; margin-bottom: 15px; }
+
+.search-results {
+    position: absolute;
+    top: 100%; left: 0; width: 100%;
+    background: #1e1e1e;
+    border: 1px solid var(--accent);
+    max-height: 300px;
+    overflow-y: auto;
+    z-index: 100;
+    display: none; /* Hidden by default */
+    box-shadow: 0 4px 10px black;
+}
+
+.result-item {
+    padding: 10px;
+    border-bottom: 1px solid #333;
+    cursor: pointer;
+    display: flex; justify-content: space-between;
+}
+.result-item:hover { background: var(--accent-glow); }
+
+/* --- SPELL CARDS --- */
+.spell-card {
+    background: rgba(0,0,0,0.3);
+    border-left: 3px solid var(--secondary);
+    padding: 10px; margin-bottom: 10px; border-radius: 4px;
+}
+.spell-level { font-size: 0.7rem; color: #aaa; text-transform: uppercase; }
+.spell-meta { font-size: 0.8rem; color: var(--accent); margin-bottom: 5px; }
